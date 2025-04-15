@@ -32,8 +32,15 @@ class Card:
             'H': 'Hearts', 'S': 'Spades'
         }[self.suit]
 
+# Costanti di gioco
+MIN_DEALER_SCORE = 17
+NUM_DECKS = 6
+CARD_BACK_PATH = "assets/r88_Casino/img/cards/cardBack.png"
+CARDS_PATH = "assets/r88_Casino/img/cards"
+
 class Deck:
-    def __init__(self):
+    def __init__(self, num_decks=NUM_DECKS):
+        self.num_decks = num_decks
         self.cards = []
         self._create_deck()
         self.shuffle()
@@ -42,20 +49,25 @@ class Deck:
         suits = ['C', 'D', 'H', 'S']
         ranks = ['2', '3', '4', '5', '6', '7', '8', '9', 't', 'j', 'q', 'k', 'a']
         
-        for suit in suits:
-            for rank in ranks:
-                filename = f"{rank}{suit}.png"
-                self.cards.append(Card(filename))
-        
-        # Aggiungi altre 2 copie per fare 6 mazzi (opzionale)
-        self.cards *= 6
+        for _ in range(self.num_decks):
+            for suit in suits:
+                for rank in ranks:
+                    filename = f"{rank}{suit}.png"
+                    self.cards.append(Card(filename))
         self.shuffle()
 
     def shuffle(self):
+        if not self.cards:
+            self._create_deck()
         random.shuffle(self.cards)
 
     def deal_card(self):
+        if not self.cards:
+            self.shuffle()
         return self.cards.pop() if self.cards else None
+
+    def cards_remaining(self):
+        return len(self.cards)
 
 class BlackjackGame:
     def __init__(self, root):
@@ -84,7 +96,7 @@ class BlackjackGame:
     def load_card_images(self):
         try:
             # Carica retro carta
-            back_img = Image.open("assets/r88_Casino/img/cards/cardBack.png")
+            back_img = Image.open(CARD_BACK_PATH)
             self.card_back = ImageTk.PhotoImage(back_img)
             
             # Carica tutte le carte
@@ -94,7 +106,7 @@ class BlackjackGame:
             for suit in suits:
                 for rank in ranks:
                     filename = f"{rank}{suit}.png"
-                    img = Image.open(f"assets/r88_Casino/img/cards/{filename}")
+                    img = Image.open(f"{CARDS_PATH}/{filename}")
                     self.card_images[filename] = ImageTk.PhotoImage(img)
                     
         except Exception as e:
@@ -227,45 +239,43 @@ class BlackjackGame:
         self.game_over = True
         dealer_value = self.calculate_hand_value(self.dealer_hand)
         player_value = self.calculate_hand_value(self.player_hand)
-
-        # Mostra tutte le carte del banco immediatamente
-        for widget in self.dealer_cards.winfo_children():
-            widget.destroy()
-        for card in self.dealer_hand:
-            tk.Label(self.dealer_cards, image=self.card_images[card.filename], 
-                    bg=self.table_background_color).pack(side="left", padx=5)
         
-        # Aggiorna il punteggio del banco
-        self.dealer_label.config(text=f"Banco: {dealer_value}")
-        self.root.update()
-        self.root.after(1000)  # Pausa per mostrare le carte iniziali del banco
-
-        # Il banco deve pescare finché non ha almeno 17
-        while dealer_value < 17:
+        # Se il giocatore ha già sballato, il banco vince automaticamente
+        if player_value > 21:
+            self.end_game("Hai sballato! Vince il banco")
+            return
+            
+        # Mostra tutte le carte del banco
+        self.update_display()
+        
+        # Il banco deve pescare finché non ha almeno 17 punti
+        while self.calculate_hand_value(self.dealer_hand) < MIN_DEALER_SCORE:
             new_card = self.deck.deal_card()
+            if not new_card:
+                break
+                
             self.dealer_hand.append(new_card)
             dealer_value = self.calculate_hand_value(self.dealer_hand)
-            
-            # Aggiorna la visualizzazione per ogni nuova carta
-            for widget in self.dealer_cards.winfo_children():
-                widget.destroy()
-            for card in self.dealer_hand:
-                tk.Label(self.dealer_cards, image=self.card_images[card.filename], 
-                        bg=self.table_background_color).pack(side="left", padx=5)
-            
-            self.dealer_label.config(text=f"Banco: {dealer_value}")
+            self.update_display()
             self.root.update()
             self.root.after(1000)  # Pausa tra le carte
-
+        
+        # Ricalcola i valori finali
+        dealer_value = self.calculate_hand_value(self.dealer_hand)
+        
         # Determina il vincitore
         if dealer_value > 21:
             self.end_game("Banco sballa! Hai vinto!")
+        elif player_value > dealer_value:
+            self.end_game("Hai vinto!")
         elif dealer_value > player_value:
             self.end_game("Vince il banco!")
-        elif dealer_value < player_value:
-            self.end_game("Hai vinto!")
         else:
             self.end_game("Pareggio!")
+            
+        # Disabilita i pulsanti di gioco
+        self.hit_btn.config(state="disabled")
+        self.stand_btn.config(state="disabled")
 
     def end_game(self, message=None):
         self.game_over = True
