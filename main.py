@@ -13,7 +13,7 @@ class Card:
 
     def _calculate_value(self):
         rank_values = {
-            '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, 
+            '2': 2, '3': 3, '4': 5, '6': 6, '7': 7, 
             '8': 8, '9': 9, 'T': 10, 'J': 10, 'Q': 10, 
             'K': 10, 'A': 11
         }
@@ -21,9 +21,8 @@ class Card:
 
     def get_rank_name(self):
         return {
-            '2': '2', '3': '3', '4': '4', '5': '5',
-            '6': '6', '7': '7', '8': '8', '9': '9',
-            'T': '10', 'J': 'Jack', 'Q': 'Queen',
+            '2': '2', '3': '3', '4': '5', '6': '6', '7': '7',
+            '8': '8', '9': '9', 'T': '10', 'J': 'Jack', 'Q': 'Queen',
             'K': 'King', 'A': 'Ace'
         }[self.rank]
 
@@ -62,8 +61,18 @@ class BlackjackGame:
     def __init__(self, root):
         self.root = root
         self.root.title("Blackjack")
-        self.root.geometry("800x600")
+        self.root.geometry("1024x768")  # Nuova dimensione della finestra
+
+        # Disabilita il ridimensionamento della finestra
+        self.root.resizable(False, False)
         
+        # Sposta la definizione di table_background_color come attributo della classe
+        self.table_background_color = "#233b30"
+
+        # Modifica il colore di sfondo del tavolo
+        lbl_tavolo = tk.Label(self.root, bg=self.table_background_color)
+        lbl_tavolo.place(x=0, y=0, relwidth=1, relheight=1)  # Adatta l'immagine allo sfondo
+
         # Caricamento immagini
         self.card_images = {}
         self.load_card_images()
@@ -94,31 +103,31 @@ class BlackjackGame:
 
     def create_widgets(self):
         # Frame principale
-        self.main_frame = tk.Frame(self.root, bg="green")
+        self.main_frame = tk.Frame(self.root, bg=self.table_background_color)
         self.main_frame.pack(fill="both", expand=True)
 
         # Area banco
-        self.dealer_frame = tk.Frame(self.main_frame, bg="green")
+        self.dealer_frame = tk.Frame(self.main_frame, bg=self.table_background_color)
         self.dealer_frame.pack(pady=20)
-        self.dealer_label = tk.Label(self.dealer_frame, text="Banco: 0", bg="green", fg="white", font=("Arial", 14))
+        self.dealer_label = tk.Label(self.dealer_frame, text="Banco: 0", bg=self.table_background_color, fg="white", font=("Arial", 14))
         self.dealer_label.pack()
 
         # Carte banco
-        self.dealer_cards = tk.Frame(self.dealer_frame, bg="green")
+        self.dealer_cards = tk.Frame(self.dealer_frame, bg=self.table_background_color)
         self.dealer_cards.pack()
 
         # Area giocatore
-        self.player_frame = tk.Frame(self.main_frame, bg="green")
+        self.player_frame = tk.Frame(self.main_frame, bg=self.table_background_color)
         self.player_frame.pack(pady=20)
-        self.player_label = tk.Label(self.player_frame, text="Giocatore: 0", bg="green", fg="white", font=("Arial", 14))
+        self.player_label = tk.Label(self.player_frame, text="Giocatore: 0", bg=self.table_background_color, fg="white", font=("Arial", 14))
         self.player_label.pack()
 
         # Carte giocatore
-        self.player_cards = tk.Frame(self.player_frame, bg="green")
+        self.player_cards = tk.Frame(self.player_frame, bg=self.table_background_color)
         self.player_cards.pack()
 
         # Pulsanti
-        self.buttons_frame = tk.Frame(self.main_frame, bg="green")
+        self.buttons_frame = tk.Frame(self.main_frame, bg=self.table_background_color)
         self.buttons_frame.pack(pady=20)
         
         self.hit_btn = tk.Button(self.buttons_frame, text="Hit", command=self.player_hit, state="disabled")
@@ -131,7 +140,7 @@ class BlackjackGame:
         self.restart_btn.pack(side="left", padx=10)
 
         # Messaggi
-        self.message_label = tk.Label(self.main_frame, text="", bg="green", fg="yellow", font=("Arial", 16))
+        self.message_label = tk.Label(self.main_frame, text="", bg=self.table_background_color, fg="yellow", font=("Arial", 16))
         self.message_label.pack()
 
     def start_new_game(self):
@@ -170,13 +179,13 @@ class BlackjackGame:
             widget.destroy()
 
         # Mostra carte banco (la prima coperta)
-        tk.Label(self.dealer_cards, image=self.card_back, bg="green").pack(side="left", padx=5)
+        tk.Label(self.dealer_cards, image=self.card_back, bg=self.table_background_color).pack(side="left", padx=5)
         for card in self.dealer_hand[1:]:
-            tk.Label(self.dealer_cards, image=self.card_images[card.filename], bg="green").pack(side="left", padx=5)
+            tk.Label(self.dealer_cards, image=self.card_images[card.filename], bg=self.table_background_color).pack(side="left", padx=5)
 
         # Mostra carte giocatore
         for card in self.player_hand:
-            tk.Label(self.player_cards, image=self.card_images[card.filename], bg="green").pack(side="left", padx=5)
+            tk.Label(self.player_cards, image=self.card_images[card.filename], bg=self.table_background_color).pack(side="left", padx=5)
 
         # Aggiorna punteggi
         dealer_value = self.calculate_hand_value(self.dealer_hand)
@@ -204,7 +213,7 @@ class BlackjackGame:
         for widget in self.dealer_cards.winfo_children():
             widget.destroy()
         for card in self.dealer_hand:
-            tk.Label(self.dealer_cards, image=self.card_images[card.filename], bg="green").pack(side="left", padx=5)
+            tk.Label(self.dealer_cards, image=self.card_images[card.filename], bg=self.table_background_color).pack(side="left", padx=5)
         
         dealer_value = self.calculate_hand_value(self.dealer_hand)
         player_value = self.calculate_hand_value(self.player_hand)
