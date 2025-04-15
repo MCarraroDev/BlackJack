@@ -77,7 +77,7 @@ python main.py
 
 ## 🖼️ Screenshot
 
-[Inserisci qui uno screenshot del gioco]
+![Screenshot del gioco](assets/r88_Casino/img/screenshots/screenshot_01.png)
 
 ## 🔧 Struttura del progetto
 
