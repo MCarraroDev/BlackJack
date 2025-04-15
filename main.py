@@ -84,7 +84,7 @@ class BlackjackGame:
     def load_card_images(self):
         try:
             # Carica retro carta
-            back_img = Image.open("assets/r88_Casino/img/cards/cardBack.png").resize((100, 145))
+            back_img = Image.open("assets/r88_Casino/img/cards/cardBack.png")
             self.card_back = ImageTk.PhotoImage(back_img)
             
             # Carica tutte le carte
@@ -94,7 +94,7 @@ class BlackjackGame:
             for suit in suits:
                 for rank in ranks:
                     filename = f"{rank}{suit}.png"
-                    img = Image.open(f"assets/r88_Casino/img/cards/{filename}").resize((100, 145))
+                    img = Image.open(f"assets/r88_Casino/img/cards/{filename}")
                     self.card_images[filename] = ImageTk.PhotoImage(img)
                     
         except Exception as e:
