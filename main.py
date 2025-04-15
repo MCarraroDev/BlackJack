@@ -13,7 +13,7 @@ class Card:
 
     def _calculate_value(self):
         rank_values = {
-            '2': 2, '3': 3, '4': 5, '6': 6, '7': 7, 
+            '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, 
             '8': 8, '9': 9, 'T': 10, 'J': 10, 'Q': 10, 
             'K': 10, 'A': 11
         }
@@ -21,7 +21,7 @@ class Card:
 
     def get_rank_name(self):
         return {
-            '2': '2', '3': '3', '4': '5', '6': '6', '7': '7',
+            '2': '2', '3': '3', '4': '4', '5': '5', '6': '6', '7': '7',
             '8': '8', '9': '9', 'T': '10', 'J': 'Jack', 'Q': 'Queen',
             'K': 'King', 'A': 'Ace'
         }[self.rank]
@@ -131,13 +131,14 @@ class BlackjackGame:
         self.buttons_frame.pack(pady=20)
         
         self.hit_btn = tk.Button(self.buttons_frame, text="Hit", command=self.player_hit, state="disabled")
-        self.hit_btn.pack(side="left", padx=10)
+        self.hit_btn.pack(side="left", padx=20)
         
         self.stand_btn = tk.Button(self.buttons_frame, text="Stand", command=self.player_stand, state="disabled")
-        self.stand_btn.pack(side="left", padx=10)
+        self.stand_btn.pack(side="left", padx=20)
         
         self.restart_btn = tk.Button(self.buttons_frame, text="Nuova Partita", command=self.start_new_game)
-        self.restart_btn.pack(side="left", padx=10)
+        self.restart_btn.pack(side="left", padx=20)
+
 
         # Messaggi
         self.message_label = tk.Label(self.main_frame, text="", bg=self.table_background_color, fg="yellow", font=("Arial", 16))
@@ -178,18 +179,32 @@ class BlackjackGame:
         for widget in self.player_cards.winfo_children():
             widget.destroy()
 
-        # Mostra carte banco (la prima coperta)
-        tk.Label(self.dealer_cards, image=self.card_back, bg=self.table_background_color).pack(side="left", padx=5)
-        for card in self.dealer_hand[1:]:
-            tk.Label(self.dealer_cards, image=self.card_images[card.filename], bg=self.table_background_color).pack(side="left", padx=5)
+        # Mostra carte banco
+        if self.game_over:
+            # Mostra tutte le carte del banco quando il gioco è finito
+            for card in self.dealer_hand:
+                tk.Label(self.dealer_cards, image=self.card_images[card.filename], 
+                        bg=self.table_background_color).pack(side="left", padx=5)
+        else:
+            # Mostra la prima carta coperta e le altre scoperte
+            tk.Label(self.dealer_cards, image=self.card_back, 
+                    bg=self.table_background_color).pack(side="left", padx=5)
+            for card in self.dealer_hand[1:]:
+                tk.Label(self.dealer_cards, image=self.card_images[card.filename], 
+                        bg=self.table_background_color).pack(side="left", padx=5)
 
         # Mostra carte giocatore
         for card in self.player_hand:
-            tk.Label(self.player_cards, image=self.card_images[card.filename], bg=self.table_background_color).pack(side="left", padx=5)
+            tk.Label(self.player_cards, image=self.card_images[card.filename], 
+                    bg=self.table_background_color).pack(side="left", padx=5)
 
-        # Aggiorna punteggi
-        dealer_value = self.calculate_hand_value(self.dealer_hand)
+        # Calcola e mostra i punteggi
         player_value = self.calculate_hand_value(self.player_hand)
+        if self.game_over:
+            dealer_value = self.calculate_hand_value(self.dealer_hand)
+        else:
+            dealer_value = self.calculate_hand_value(self.dealer_hand[1:])
+
         self.dealer_label.config(text=f"Banco: {dealer_value}")
         self.player_label.config(text=f"Giocatore: {player_value}")
 
@@ -209,23 +224,48 @@ class BlackjackGame:
             self.dealer_turn()
 
     def dealer_turn(self):
-        # Rivela tutte le carte del banco
-        for widget in self.dealer_cards.winfo_children():
-            widget.destroy()
-        for card in self.dealer_hand:
-            tk.Label(self.dealer_cards, image=self.card_images[card.filename], bg=self.table_background_color).pack(side="left", padx=5)
-        
+        self.game_over = True
         dealer_value = self.calculate_hand_value(self.dealer_hand)
         player_value = self.calculate_hand_value(self.player_hand)
 
-        while dealer_value < 17:
-            self.dealer_hand.append(self.deck.deal_card())
-            dealer_value = self.calculate_hand_value(self.dealer_hand)
-            self.update_display()
-            self.root.update()
-            self.root.after(1000)
+        # Mostra tutte le carte del banco immediatamente
+        for widget in self.dealer_cards.winfo_children():
+            widget.destroy()
+        for card in self.dealer_hand:
+            tk.Label(self.dealer_cards, image=self.card_images[card.filename], 
+                    bg=self.table_background_color).pack(side="left", padx=5)
+        
+        # Aggiorna il punteggio del banco
+        self.dealer_label.config(text=f"Banco: {dealer_value}")
+        self.root.update()
+        self.root.after(1000)  # Pausa per mostrare le carte iniziali del banco
 
-        self.end_game()
+        # Il banco deve pescare finché non ha almeno 17
+        while dealer_value < 17:
+            new_card = self.deck.deal_card()
+            self.dealer_hand.append(new_card)
+            dealer_value = self.calculate_hand_value(self.dealer_hand)
+            
+            # Aggiorna la visualizzazione per ogni nuova carta
+            for widget in self.dealer_cards.winfo_children():
+                widget.destroy()
+            for card in self.dealer_hand:
+                tk.Label(self.dealer_cards, image=self.card_images[card.filename], 
+                        bg=self.table_background_color).pack(side="left", padx=5)
+            
+            self.dealer_label.config(text=f"Banco: {dealer_value}")
+            self.root.update()
+            self.root.after(1000)  # Pausa tra le carte
+
+        # Determina il vincitore
+        if dealer_value > 21:
+            self.end_game("Banco sballa! Hai vinto!")
+        elif dealer_value > player_value:
+            self.end_game("Vince il banco!")
+        elif dealer_value < player_value:
+            self.end_game("Hai vinto!")
+        else:
+            self.end_game("Pareggio!")
 
     def end_game(self, message=None):
         self.game_over = True
