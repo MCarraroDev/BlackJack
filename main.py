@@ -9,8 +9,8 @@ class GiocoBlackjack:
     PERCORSO_CARTE = "assets/r88_Casino/img/cards"
     PUNTEGGIO_MINIMO_BANCO = 17  # Il banco deve pescare fino a raggiungere almeno 17
 
-    def __init__(self, radice):
-        self.radice = radice
+    def __init__(self, root):
+        self.root = root
         self.configura_finestra()
         self.carica_immagini_carte()
         self.crea_widgets()
@@ -18,13 +18,13 @@ class GiocoBlackjack:
 
     def configura_finestra(self):
         """Configura l'aspetto della finestra di gioco"""
-        self.radice.title("Blackjack")
-        self.radice.geometry("1280x720")  # Dimensione ottimale per un tavolo da gioco
-        self.radice.resizable(False, False)
-        self.colore_sfondo_tavolo = "#233b30"  # Verde scuro del tavolo
+        self.root.title("Blackjack")
+        self.root.geometry("1280x720")  # Dimensione ottimale per un tavolo da gioco
+        self.root.resizable(False, False)
+        self.colore_sfondo_tavolo = "#233b30"  # Verde scuro del tavolo (colore di assets/r88_Casino/img/backgrounds/table_green.png)
         
         # Crea lo sfondo verde del tavolo
-        self.sfondo = tk.Label(self.radice, bg=self.colore_sfondo_tavolo)
+        self.sfondo = tk.Label(self.root, bg=self.colore_sfondo_tavolo)
         self.sfondo.place(x=0, y=0, relwidth=1, relheight=1)
 
     def carica_immagini_carte(self):
@@ -46,12 +46,12 @@ class GiocoBlackjack:
                     self.immagini_carte[nome_file] = ImageTk.PhotoImage(img)
         except:
             messagebox.showerror("Errore", "Impossibile caricare le immagini delle carte")
-            self.radice.destroy()
+            self.root.destroy()
 
     def crea_widgets(self):
         """Crea tutti gli elementi grafici del gioco"""
         # Frame principale che contiene tutto
-        self.frame_principale = tk.Frame(self.radice, bg=self.colore_sfondo_tavolo)
+        self.frame_principale = tk.Frame(self.root, bg=self.colore_sfondo_tavolo)
         self.frame_principale.pack(fill="both", expand=True)
 
         self.crea_area_banco()    # Crea l'area per le carte del banco
@@ -216,8 +216,8 @@ class GiocoBlackjack:
                 
             self.mano_banco.append(nuova_carta)
             self.aggiorna_display()
-            self.radice.update()
-            self.radice.after(1000)  # Pausa di 1 secondo tra le carte
+            self.root.update()
+            self.root.after(1000)  # Pausa di 1 secondo tra le carte
         
         valore_banco = self.calcola_valore_mano(self.mano_banco)
         self.determina_vincitore(valore_banco, valore_giocatore)
@@ -241,6 +241,6 @@ class GiocoBlackjack:
         self.etichetta_messaggio.config(text=messaggio)
 
 if __name__ == "__main__":
-    radice = tk.Tk()
-    gioco = GiocoBlackjack(radice)
-    radice.mainloop()
+    root = tk.Tk()
+    gioco = GiocoBlackjack(root)
+    root.mainloop()
