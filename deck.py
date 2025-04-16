@@ -8,7 +8,12 @@ class Mazzo:
         self._crea_mazzo()
 
     def _crea_mazzo(self):
-        """Crea un nuovo mazzo con il numero specificato di mazzi"""
+        """
+        Crea un nuovo mazzo con il numero specificato di mazzi.
+        Questa è una funzione privata (inizia con _) e dovrebbe essere chiamata
+        solo all'interno della classe Mazzo.
+        """
+        
         self.carte = []  # Puliamo il mazzo esistente
         semi = ['C', 'D', 'H', 'S']
         ranghi = ['2', '3', '4', '5', '6', '7', '8', '9', 't', 'j', 'q', 'k', 'a']
