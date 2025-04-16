@@ -25,10 +25,13 @@ class GiocoBlackjack:
         self.sfondo.place(x=0, y=0, relwidth=1, relheight=1)
 
     def carica_immagini_carte(self):
+        """Carica le immagini delle carte"""
         try:
+            # Carica il retro della carta
             img_retro = Image.open(self.PERCORSO_RETRO_CARTA)
             self.retro_carta = ImageTk.PhotoImage(img_retro)
             
+            # Carica tutte le carte
             self.immagini_carte = {}
             semi = ['C', 'D', 'H', 'S']
             ranghi = ['2', '3', '4', '5', '6', '7', '8', '9', 't', 'j', 'q', 'k', 'a']
@@ -36,11 +39,17 @@ class GiocoBlackjack:
             for seme in semi:
                 for rango in ranghi:
                     nome_file = f"{rango}{seme}.png"
-                    img = Image.open(f"{self.PERCORSO_CARTE}/{nome_file}")
-                    self.immagini_carte[nome_file] = ImageTk.PhotoImage(img)
-        except Exception as e:
-            messagebox.showerror("Errore", f"Impossibile caricare le immagini: {str(e)}")
+                    try:
+                        img = Image.open(f"{self.PERCORSO_CARTE}/{nome_file}")
+                        self.immagini_carte[nome_file] = ImageTk.PhotoImage(img)
+                    except:
+                        messagebox.showerror("Errore", f"Immagine {nome_file} non trovata")
+                        self.radice.destroy()
+                        return
+        except:
+            messagebox.showerror("Errore", "Impossibile caricare le immagini delle carte")
             self.radice.destroy()
+            return
 
     def crea_widgets(self):
         # Frame principale
